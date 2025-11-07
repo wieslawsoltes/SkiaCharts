@@ -35,13 +35,17 @@ jobs:
       - name: Pack
         run: dotnet pack SkiaCharts.sln --configuration Release --no-build --output artifacts -p:ContinuousIntegrationBuild=true
 
-      - name: Create GitHub release
+      - name: Upload artifacts to GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ github.ref_name }}" artifacts/*.nupkg \
-            --title "SkiaCharts ${{ github.ref_name }}" \
-            --generate-notes
+          tag="${{ github.ref_name }}"
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag does not exist. Ensure the tag workflow creates it before uploading artifacts." >&2
+            exit 1
+          fi
+
+          gh release upload "$tag" artifacts/*.nupkg --clobber
 
       - name: Publish to NuGet
         env:
