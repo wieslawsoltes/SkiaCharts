@@ -1,229 +1,158 @@
 # SkiaCharts
 
-High-performance charting framework built on SkiaSharp with Avalonia integration.
+[![CI](https://github.com/wieslawsoltes/SkiaCharts/actions/workflows/ci.yml/badge.svg)](https://github.com/wieslawsoltes/SkiaCharts/actions/workflows/ci.yml)
 
-## Project Vision
+High-performance charting framework built on SkiaSharp with a first-class Avalonia UI experience.
 
-Enterprise-grade, modular charting framework with Excel/trading chart parity, real-time capabilities, and deep Avalonia integration.
+## Packages
 
-## Current Status
+| Package | Description | NuGet |
+| --- | --- | --- |
+| `SkiaCharts.Core` | Platform-agnostic rendering engine, chart primitives, and data abstractions. | [![SkiaCharts.Core](https://img.shields.io/nuget/vpre/SkiaCharts.Core?logo=nuget&label=Core)](https://www.nuget.org/packages/SkiaCharts.Core/) |
+| `SkiaCharts.Avalonia` | Avalonia control set, theming, and bindings for hosting charts in desktop apps. | [![SkiaCharts.Avalonia](https://img.shields.io/nuget/vpre/SkiaCharts.Avalonia?logo=nuget&label=Avalonia)](https://www.nuget.org/packages/SkiaCharts.Avalonia/) |
+| `SkiaCharts.Trading` | Financial/trading extensions, indicators, and specialized chart types. | [![SkiaCharts.Trading](https://img.shields.io/nuget/vpre/SkiaCharts.Trading?logo=nuget&label=Trading)](https://www.nuget.org/packages/SkiaCharts.Trading/) |
 
-**Milestone 1: Foundation & Core Architecture** ✅ COMPLETED
-**Milestone 1.5: Animation Framework** ✅ COMPLETED
-**Milestone 2: Essential Chart Types** ✅ COMPLETED
+## Quick Start
 
-📊 **204/204 tests passing** (100%)
+### Install via NuGet
 
-### Implemented Features
+```bash
+dotnet add package SkiaCharts.Core
+dotnet add package SkiaCharts.Avalonia
+# Optional trading extensions
+dotnet add package SkiaCharts.Trading
+```
 
-#### Data Abstractions
-- ✅ `IDataPoint` - Base interface for all data points
-- ✅ `DataPoint` - Basic 2D data point structure
-- ✅ `OhlcDataPoint` - OHLC data point for financial charts
-- ✅ `ScatterDataPoint` - Extended data point with size and color values
-- ✅ `PieDataPoint` - Data point for pie/donut charts with optional labels
-- ✅ `IDataSeries<T>` - Generic data series interface
-- ✅ `DataSeries<T>` - Immutable data series with automatic bounds calculation
-- ✅ `ObservableDataSeries<T>` - Observable series for real-time data
-- ✅ `CircularBuffer<T>` - Fixed-size rolling buffer for streaming
-- ✅ `DataRange` - Range utilities for min/max calculations
-- ✅ `DataSeriesCollection` - Manage multiple series efficiently
-- ✅ `DataTransform` - Pipeline for data preprocessing (NEW!)
-  - ✅ Scale, Offset, Normalize, Log transformations
-  - ✅ Moving Average smoothing
-  - ✅ Clamp and composable pipeline
+### Basic rendering (SkiaSharp)
 
-#### Rendering Pipeline
-- ✅ `IRenderContext` - Abstraction over SkiaSharp canvas
-- ✅ `RenderContext` - Default implementation
-- ✅ `RenderQueue` - Layer-based rendering system
-- ✅ `RenderLayer` - Defined rendering layers (Background, Grid, Data, Annotations, Overlay)
-- ✅ `IRenderable` - Interface for renderable elements
-- ✅ `ViewportManager` - Coordinate transformation (data ↔ screen space)
-  - ✅ Zoom support
-  - ✅ Pan support
-  - ✅ FitToRange support
-- ✅ `ClipRegion` - Efficient viewport culling support
+```csharp
+using SkiaCharts.Core.Axes;
+using SkiaCharts.Core.Charts;
+using SkiaCharts.Core.Data;
+using SkiaSharp;
 
-#### Axis System
-- ✅ `IAxis` - Base axis interface
-- ✅ `LinearAxis` - Linear numeric axis with auto-scaling
-  - ✅ "Nice number" tick generation algorithm
-  - ✅ Automatic label formatting based on magnitude
-  - ✅ Custom format string support
-- ✅ `DateTimeAxis` - Time-based axis
-  - ✅ Intelligent interval selection (seconds to decades)
-  - ✅ Auto-formatting based on time span
-  - ✅ Works with OADate internally
-- ✅ `CategoryAxis` - Categorical/discrete axis
-  - ✅ Dynamic category management
-  - ✅ Label skip logic for overcrowding
-  - ✅ Optimal range for bar centering
-- ✅ `LogarithmicAxis` - Logarithmic scale axis (NEW!)
-  - ✅ Base-n logarithmic scaling (default base 10)
-  - ✅ Major/minor tick generation
-  - ✅ Smart formatting (10^n notation)
-- ✅ `AxisPosition` - Enum for axis positioning (Left, Right, Top, Bottom)
-- ✅ `TickInfo` - Tick information structure
+var series = new DataSeries<DataPoint>(
+    Enumerable.Range(0, 500)
+        .Select(i => new DataPoint(i, MathF.Sin(i * 0.05f))),
+    name: "Sample");
 
-#### Core Chart Infrastructure
-- ✅ `ChartElement` - Base class for renderable elements
-- ✅ `ChartArea` - Plotting area with margins and padding
-- ✅ `ChartBase` - Abstract base for all chart types
-- ✅ `LineChart` - Basic line chart implementation
-  - ✅ Multi-series support
-  - ✅ Optional markers
-  - ✅ Configurable line style
-- ✅ `LineChartEnhanced` - Advanced line chart
-  - ✅ 3 line modes: Linear, Stepped, Smooth (Catmull-Rom splines)
-  - ✅ 7 marker shapes: Circle, Square, Diamond, Triangle, TriangleDown, Cross, Plus
-  - ✅ Area fills with customizable color/alpha
-  - ✅ Dash patterns for dashed/dotted lines
-  - ✅ Per-series styling with independent configurations
-  - ✅ Marker fill and stroke customization
-  - ✅ Smooth curve tension control (0-1)
-- ✅ `BarChart` - Bar/Column chart with full feature set
-  - ✅ 2 orientations: Vertical (column) and Horizontal (bar)
-  - ✅ 3 stack modes: None (grouped), Absolute, Percentage
-  - ✅ Rounded corners with configurable radius
-  - ✅ Gradient fills (linear, configurable angle)
-  - ✅ Border/outline support with width and color
-  - ✅ Per-series styling
-  - ✅ Value labels with formatting
-  - ✅ Configurable bar width and spacing
-  - ✅ Minimum bar size for small values
-- ✅ `AreaChart` - Area chart with transparency and gradients
-  - ✅ 3 area modes: Linear, Stepped, Smooth (Catmull-Rom splines)
-  - ✅ 2 stack modes: None (overlapping), Stacked
-  - ✅ Gradient fills (vertical, horizontal, radial)
-  - ✅ Transparency/alpha blending support
-  - ✅ Optional boundary line with dash patterns
-  - ✅ Customizable baseline
-  - ✅ Per-series styling
-  - ✅ Negative value support
-- ✅ `ScatterChart` - Scatter chart with advanced visualization
-  - ✅ 7 marker shapes: Circle, Square, Diamond, Triangle, TriangleDown, Cross, Plus
-  - ✅ Variable marker sizing based on data values
-  - ✅ Color mapping with interpolated color scales
-  - ✅ Customizable color scales (default: blue→cyan→green→yellow→red)
-  - ✅ Marker borders/outlines with width and color
-  - ✅ Optional connecting lines between points
-  - ✅ Per-series styling
-  - ✅ Support for mixed data point types
-  - ✅ Edge case handling (same sizes/colors, empty data)
-- ✅ `PieChart` - Pie and donut charts with rich features (NEW!)
-  - ✅ Unified chart for both pie and donut modes
-  - ✅ Configurable inner radius ratio for donut thickness (0-1)
-  - ✅ Exploded slices with configurable distance
-  - ✅ Multiple exploded slices support
-  - ✅ Rotation/start angle configuration (0-360 degrees)
-  - ✅ Radial gradient fills for slices
-  - ✅ Slice borders/outlines with width and color
-  - ✅ 3 label positions: None, Inside, Outside with leader lines
-  - ✅ 6 label content types: Percentage, Value, Both, Name, NameAndPercentage, NameAndValue
-  - ✅ Automatic label skipping for small slices
-  - ✅ Per-slice styling (color, gradient, explode distance, border)
-  - ✅ Default color palette (8 colors)
-  - ✅ Automatic percentage calculation
-  - ✅ Handles negative/zero values (skips them)
-  - ✅ Configurable radius ratio for chart sizing
+var chart = new LineChart
+{
+    Title = "Sine wave",
+    LineWidth = 3f,
+    LineColor = SKColors.DeepSkyBlue,
+    XAxis = new LinearAxis { Position = AxisPosition.Bottom },
+    YAxis = new LinearAxis { Position = AxisPosition.Left }
+};
 
-#### Utilities
-- ✅ `MathHelper` - Mathematical utilities for charting
-  - ✅ Clamp
-  - ✅ Lerp (linear interpolation)
-  - ✅ Nice number calculation
-  - ✅ Significant figures rounding
+chart.Series.Add(series);
 
-#### Animation Framework
-- ✅ `Animation<T>` - Generic animation with any value type
-- ✅ `AnimationController` - Manage multiple animations with FPS tracking
-- ✅ `IEasingFunction` - 28 easing functions + custom Bezier
-  - Linear, Quadratic, Cubic, Sine, Exponential, Elastic, Bounce, Back, Circular
-  - Each with In, Out, InOut variants (except Linear)
-  - Custom cubic Bezier curves via `CreateBezier(x1, y1, x2, y2)`
-- ✅ `Interpolators` - Color, Point, Rect, Size interpolation
-- ✅ Frame-rate independent animations (delta time)
-- ✅ Animation callbacks (Start, Update, Complete)
-- ✅ Loop and Auto-reverse support
-- ✅ `AnimationGroup` - Parallel animation execution
-- ✅ `AnimationSequence` - Sequential animation chaining
-- ✅ `SpringAnimation` - Physics-based spring animations
-- ✅ `AnimatableProperty<T>` - MVVM-ready property wrapper
-- ✅ Fluent API and 7 animation presets
-- ✅ Chart-specific animations (NEW!)
-  - ✅ `FadeInAnimation` - Opacity fade-in
-  - ✅ `GrowAnimation` - Scale growth
-  - ✅ `SlideInAnimation` - Slide from direction
-  - ✅ `WipeAnimation` - Progressive reveal
+using var bitmap = new SKBitmap(1200, 480);
+using var canvas = new SKCanvas(bitmap);
+chart.Render(canvas, bitmap.Width, bitmap.Height);
 
-#### Testing
-- ✅ 204 unit tests passing (100%)
-- ✅ Data series tests (9 tests)
-- ✅ Viewport transformation tests (4 tests)
-- ✅ ClipRegion tests (13 tests)
-- ✅ Animation tests (16 tests)
-  - Core animation tests
-  - Bezier easing tests
-- ✅ Axis system tests (23 tests)
-  - LinearAxis tests (7)
-  - DateTimeAxis tests (6)
-  - CategoryAxis tests (10)
-- ✅ LineChartEnhanced tests (26 tests)
-  - Line mode tests (Linear, Stepped, Smooth)
-  - Marker shape tests (all 7 shapes)
-  - Area fill tests
-  - Dash pattern tests
-  - Multi-series tests
-  - Edge case tests
-- ✅ BarChart tests (24 tests)
-  - Orientation tests (Vertical, Horizontal)
-  - Stack mode tests (None, Absolute, Percentage)
-  - Rounded corners tests
-  - Gradient fill tests
-  - Border/outline tests
-  - Value label tests
-  - Multi-series tests (grouped and stacked)
-  - Edge case tests
-- ✅ AreaChart tests (26 tests)
-  - Area mode tests (Linear, Stepped, Smooth)
-  - Stack mode tests (None, Stacked)
-  - Gradient tests (Vertical, Horizontal, Radial)
-  - Transparency/alpha tests
-  - Boundary line tests
-  - Baseline customization tests
-  - Multi-series tests
-  - Edge case tests
-- ✅ ScatterChart tests (22 tests)
-  - Marker shape tests (all 7 shapes)
-  - Variable marker sizing tests
-  - Color mapping tests (default and custom scales)
-  - Combined features tests (size + color)
-  - Connecting lines tests
-  - Border/outline tests with all shapes
-  - Multi-series tests with different styles
-  - Mixed data point type tests
-  - Edge case tests (empty data, single point, same values, large datasets)
-- ✅ PieChart tests (31 tests - NEW!)
-  - Basic pie and donut rendering tests
-  - Exploded slice tests (single and multiple)
-  - Start angle/rotation tests (0°, 90°, 180°, 270°)
-  - Gradient fill tests (single and multiple slices)
-  - Slice border tests
-  - Label position tests (None, Inside, Outside)
-  - Label content tests (all 6 content types)
-  - Donut with labels tests
-  - Small slice label skipping tests
-  - Value handling tests (negative, zero, all zero)
-  - Donut thickness tests (thin and thick rings)
-  - Exploded donut tests
-  - Combined features tests (exploded + gradient + labels)
-  - Custom radius ratio tests
-  - Mixed data point type tests (PieDataPoint and DataPoint)
-  - Edge case tests (empty series, single slice, many slices)
-- ✅ Integration tests (10 tests)
-  - Complete workflow tests
-  - Component interaction tests
+// Persist the bitmap using standard SkiaSharp helpers.
+```
+
+### Avalonia host
+
+```xml
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:charts="clr-namespace:SkiaCharts.Avalonia.Controls;assembly=SkiaCharts.Avalonia">
+  <charts:SkiaChartView Chart="{Binding Chart}"
+                        EnableZoom="True"
+                        EnablePan="True"
+                        ShowLegend="True"
+                        Margin="16" />
+</UserControl>
+```
+
+```csharp
+public class ChartViewModel
+{
+    public ChartBase Chart { get; }
+
+    public ChartViewModel()
+    {
+        var points = Enumerable.Range(0, 100)
+            .Select(i => new DataPoint(i, i))
+            .ToList();
+
+        var series = new DataSeries<DataPoint>(points, "Line");
+        var chart = new LineChart { Title = "Avalonia sample" };
+        chart.Series.Add(series);
+
+        Chart = chart;
+    }
+}
+```
+
+### Build & test locally
+
+```bash
+dotnet restore
+dotnet build
+dotnet test
+```
+
+## Continuous Integration & Releases
+
+The GitHub Actions workflow (`.github/workflows/ci.yml`) restores, builds, tests, and packs the solution on every push and pull request. Tagging a commit with the `v*` pattern automatically:
+
+1. Publishes the generated NuGet packages as workflow artifacts.
+2. Creates a GitHub Release with generated notes and attached `.nupkg` files.
+3. Pushes packages to NuGet using the repository `NUGET_API_KEY` secret.
+
+## Feature Roadmap
+
+| Area | Supported Today | Planned |
+| --- | --- | --- |
+| Data & Series | `IDataPoint`, `DataSeries`, `ObservableDataSeries`, `CircularBuffer`, `DataRange`, and the transform pipeline (scale/offset/normalize/log/moving average). | Streaming data adapters, rolling aggregations, reusable indicator catalog. |
+| Chart Types | Line, area, bar/column, scatter, pie/donut, and configurable trading primitives with per-series styling and gradients. | Candlestick/Heikin-Ashi, heatmaps, dashboards, and composable multi-chart layouts. |
+| Axes & Scaling | Linear, logarithmic, date/time, and category axes with auto-fit, tick formatting, and grid styling. | Dual-axis sync, polar/radar axes, and customizable axis renderers. |
+| Rendering & Layout | Layered render queue, clip regions, viewport manager with fit/zoom/pan, chart area layout, theming support. | Adaptive layout presets, accessibility overlays, export helpers. |
+| Interaction & Animation | Zoom/pan gestures, animation framework with easing presets, hooks for tooltips/markers via Avalonia controls. | Crosshair/selection gestures, annotation authoring, richer animation presets. |
+| Avalonia Integration | `SkiaChartView`, theme presets, MVVM bindings, and the gallery sample. | Responsive dashboard components, designer tooling, Fluent-style templates. |
+
+## Detailed Feature Matrix
+
+| Area | Capability | Status | Notes |
+| --- | --- | --- | --- |
+| Data | `IDataPoint`, `DataPoint` | ✅ | Immutable XY primitives with documented semantics for every chart. |
+| Data | `OhlcDataPoint` | ✅ | High/low/open/close payload used by trading visuals and indicators. |
+| Data | `ScatterDataPoint` | ✅ | Adds color/size channels to drive bubble charts and heat-style plots. |
+| Data | `PieDataPoint` | ✅ | Provides slice labels, explode distance, and per-slice color overrides. |
+| Data | `DataSeries<T>` | ✅ | Immutable series with lazy min/max caching and indexer access. |
+| Data | `DataSeriesCollection` | ✅ | Aggregates multiple series and exports combined X/Y ranges. |
+| Data | `ObservableDataSeries<T>` | ✅ | Notifies listeners of insert/remove operations for live dashboards. |
+| Data | `CircularBuffer<T>` | ✅ | Fixed-size rolling buffer optimized for streaming financial feeds. |
+| Data | `DataTransform` pipeline | ✅ | Chainable scale/offset/normalize/log/moving-average transforms. |
+| Rendering | `IRenderContext` / `RenderContext` | ✅ | Abstraction over SkiaSharp canvases, handles clears and draw ops. |
+| Rendering | `RenderQueue` & `RenderLayer` | ✅ | Layered renderer ordering background, grid, data, annotations, overlay. |
+| Rendering | `ViewportManager` | ✅ | Bidirectional data↔screen transforms with zoom/pan/fit support. |
+| Rendering | `ClipRegion` | ✅ | Efficient culling that skips drawing work outside the viewport. |
+| Rendering | `ChartArea` layout | ✅ | Computes margins and padding to derive the plot rectangle. |
+| Axes | `LinearAxis` | ✅ | Auto-scaling, nice-number ticks, and customizable format strings. |
+| Axes | `DateTimeAxis` | ✅ | Picks optimal intervals (seconds→decades) and formats timestamps. |
+| Axes | `CategoryAxis` | ✅ | Category management with label skipping and centered bars. |
+| Axes | `LogarithmicAxis` | ✅ | Base-n scaling with major/minor tick generation and 10^n labels. |
+| Axes | Axis primitives | ✅ | `AxisPosition`, `TickInfo`, and shared contracts for custom axes. |
+| Charts | `LineChart` | ✅ | Lightweight renderer with markers, per-series color and width. |
+| Charts | `LineChartEnhanced` | ✅ | Linear/stepped/smooth curves, dash patterns, area fills, 7 marker shapes. |
+| Charts | `BarChart` | ✅ | Vertical/horizontal layouts, stacking modes, gradients, borders, labels. |
+| Charts | `AreaChart` | ✅ | Overlapping or stacked areas with gradients, transparency, baselines. |
+| Charts | `ScatterChart` | ✅ | 7 marker shapes, variable sizing, color mapping, optional connectors. |
+| Charts | `PieChart` | ✅ | Unified pie/donut engine with exploded slices, label positions, gradients. |
+| Animation | Core animation engine | ✅ | 28 easing functions, interpolators, sequences/groups, FPS awareness. |
+| Animation | Chart animation presets | ✅ | Fade, grow, slide, and wipe helpers tuned for chart scenarios. |
+| Interaction | Viewport gestures | ✅ | Zoom, pan, and fit-to-range via `ViewportManager` APIs. |
+| Interaction | Hit testing API | 🟡 | `ChartBase.HitTest` stub ready; interactive annotations queued next. |
+| Avalonia | `SkiaChartView` control | ✅ | GPU-backed control with caching, bindings, and property system integration. |
+| Avalonia | Theme system (`ChartTheme`) | ✅ | Light/dark presets and binding hooks for app-wide theming. |
+| Avalonia | Gallery sample | ✅ | Desktop showcase demonstrating MVVM bindings and multiple chart types. |
+| Tooling | `SkiaCharts.Core.Tests` suite | ✅ | 200+ unit tests covering data structures, charts, and rendering logic. |
+| Tooling | Documentation set | ✅ | README plus `docs/PLAN.md` communicate roadmap and architecture. |
 
 ## Project Structure
 
@@ -258,42 +187,6 @@ dotnet build
 ```bash
 dotnet test
 ```
-
-All tests passing: ✅ 204/204
-
-## Next Steps
-
-See [docs/PLAN.md](docs/PLAN.md) for the complete roadmap.
-
-**Milestone 2: Essential Chart Types** ✅ COMPLETE
-- ✅ Line Charts (M2.1)
-  - Linear, Stepped, and Smooth curves
-  - 7 marker shapes with customization
-  - Area fills and dash patterns
-  - Per-series styling
-- ✅ Bar/Column Charts (M2.2)
-  - Vertical and horizontal orientations
-  - Grouped, stacked (absolute), and stacked (percentage) modes
-  - Rounded corners, gradients, and borders
-  - Value labels and styling
-- ✅ Area Charts (M2.3)
-  - Linear, Stepped, and Smooth modes
-  - Overlapping and stacked modes
-  - Three gradient directions (vertical, horizontal, radial)
-  - Transparency and baseline support
-- ✅ Scatter Charts (M2.4)
-  - 7 marker shapes with variable sizing
-  - Color mapping with interpolated scales
-  - Connecting lines and border support
-  - Per-series styling
-- ✅ Pie/Donut Charts (M2.5)
-  - Unified pie/donut implementation
-  - Exploded slices and rotation
-  - Labels with leader lines
-  - Radial gradients and borders
-
-**Next Major Milestone: M3 - Advanced Chart Types**
-See [docs/PLAN.md](docs/PLAN.md) for detailed planning.
 
 ## Requirements
 

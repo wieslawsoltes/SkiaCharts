@@ -5,11 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>0.1.0</Version>
-    <Authors>SkiaCharts Contributors</Authors>
+    <IsPackable>true</IsPackable>
+    <PackageId>SkiaCharts.Core</PackageId>
+    <Title>SkiaCharts.Core</Title>
     <Description>High-performance charting framework built on SkiaSharp</Description>
     <PackageTags>charts;charting;skia;skiasharp;visualization;data-visualization</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>

@@ -4,6 +4,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>true</IsPackable>
+    <PackageId>SkiaCharts.Trading</PackageId>
+    <Title>SkiaCharts.Trading</Title>
+    <Description>Trading-focused chart types and indicators for SkiaCharts.</Description>
+    <PackageTags>charts;charting;trading;financial;skia</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

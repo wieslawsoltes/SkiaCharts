@@ -4,6 +4,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>true</IsPackable>
+    <PackageId>SkiaCharts.Avalonia</PackageId>
+    <Title>SkiaCharts.Avalonia</Title>
+    <Description>Avalonia UI integration helpers and controls for SkiaCharts.</Description>
+    <PackageTags>avalonia;charts;charting;skia;skiasharp</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

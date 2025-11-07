@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '9.0.x'
+
+jobs:
+  build-pack:
+    name: Build, Test & Pack
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore SkiaCharts.sln
+
+      - name: Build
+        run: dotnet build SkiaCharts.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test SkiaCharts.sln --configuration Release --no-build --verbosity normal
+
+      - name: Pack
+        run: dotnet pack SkiaCharts.sln --configuration Release --no-build --output artifacts -p:ContinuousIntegrationBuild=true
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: artifacts/*.nupkg
+          if-no-files-found: error

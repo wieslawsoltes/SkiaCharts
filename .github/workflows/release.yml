@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '9.0.x'
+
+jobs:
+  publish:
+    name: Build & Publish Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore SkiaCharts.sln
+
+      - name: Build
+        run: dotnet build SkiaCharts.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test SkiaCharts.sln --configuration Release --no-build --verbosity normal
+
+      - name: Pack
+        run: dotnet pack SkiaCharts.sln --configuration Release --no-build --output artifacts -p:ContinuousIntegrationBuild=true
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" artifacts/*.nupkg \
+            --title "SkiaCharts ${{ github.ref_name }}" \
+            --generate-notes
+
+      - name: Publish to NuGet
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "NUGET_API_KEY secret is not configured" >&2
+            exit 1
+          fi
+
+          for package in artifacts/*.nupkg; do
+            dotnet nuget push "$package" \
+              --source https://api.nuget.org/v3/index.json \
+              --api-key "$NUGET_API_KEY" \
+              --skip-duplicate
+          done
