@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SkiaCharts.Gallery.ViewModels.RealTimeDemos"
+             xmlns:controls="using:SkiaCharts.Avalonia.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="SkiaCharts.Gallery.Views.RealTimeDemos.StreamingLineView"
+             x:DataType="vm:StreamingLineViewModel">
+
+    <Grid RowDefinitions="Auto,*">
+        <Border Grid.Row="0" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                Padding="20,16" Margin="0,0,0,16">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Streaming Line Chart"
+                           FontSize="24" FontWeight="SemiBold" />
+                <TextBlock Text="Real-time line chart that updates continuously with new data points. Displays a rolling window of the most recent 100 data points, updating 10 times per second."
+                           FontSize="14" Opacity="0.7"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                CornerRadius="8" Padding="20" Margin="20">
+            <controls:SkiaChartView Chart="{Binding Chart}" />
+        </Border>
+    </Grid>
+
+</UserControl>

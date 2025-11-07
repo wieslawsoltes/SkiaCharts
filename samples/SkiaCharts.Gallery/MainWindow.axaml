@@ -1,0 +1,287 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:SkiaCharts.Gallery.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+        x:Class="SkiaCharts.Gallery.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="SkiaCharts Gallery"
+        Width="1400" Height="900"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent">
+
+    <Grid ColumnDefinitions="Auto,*">
+        <!-- Sidebar -->
+        <Border Grid.Column="0"
+                Background="{DynamicResource SystemChromeLowColor}"
+                BorderBrush="{DynamicResource SystemBaseLowColor}"
+                BorderThickness="0,0,1,0"
+                Width="280"
+                IsVisible="{Binding IsSidebarOpen}">
+            <Grid RowDefinitions="Auto,Auto,*,Auto">
+                <!-- Header -->
+                <Border Grid.Row="0" Background="{DynamicResource SystemAccentColor}"
+                        Padding="20,16">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="SkiaCharts" FontSize="24" FontWeight="Bold"
+                                   Foreground="White" />
+                        <TextBlock Text="Gallery &amp; Examples" FontSize="12"
+                                   Foreground="White" Opacity="0.9" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Search Box -->
+                <Border Grid.Row="1" Padding="12" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                    <TextBox Watermark="Search demos..."
+                             Text="{Binding SearchQuery, Mode=TwoWay}"
+                             CornerRadius="4" />
+                </Border>
+
+                <!-- Categories List -->
+                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="0,8">
+                        <!-- All Demos -->
+                        <Button Classes="nav-button"
+                                Command="{Binding NavigateToHomeCommand}"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Left">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <TextBlock Text="🏠" FontSize="20" />
+                                <StackPanel>
+                                    <TextBlock Text="All Demos" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding FilteredDemos.Count, StringFormat='{}{0} demos'}"
+                                               FontSize="11" Opacity="0.7" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Button>
+
+                        <Separator Margin="12,8" />
+
+                        <!-- Category Buttons -->
+                        <ItemsControl ItemsSource="{Binding Categories}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Classes="nav-button"
+                                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).SelectCategoryCommand}"
+                                            CommandParameter="{Binding}"
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Left">
+                                        <StackPanel Orientation="Horizontal" Spacing="12">
+                                            <TextBlock Text="{Binding Icon}" FontSize="20" />
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding Description}"
+                                                           FontSize="11" Opacity="0.7"
+                                                           TextWrapping="Wrap" MaxWidth="200" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Footer -->
+                <Border Grid.Row="3" Padding="12" BorderBrush="{DynamicResource SystemBaseLowColor}"
+                        BorderThickness="0,1,0,0">
+                    <StackPanel Spacing="8">
+                        <TextBlock FontSize="10" Opacity="0.6" HorizontalAlignment="Center">
+                            <Run Text="{Binding TotalDemoCount}" />
+                            <Run Text=" demos available" />
+                        </TextBlock>
+                        <Button Content="Toggle Sidebar"
+                                Command="{Binding ToggleSidebarCommand}"
+                                HorizontalAlignment="Stretch" />
+                        <TextBlock Text="{Binding Version}" FontSize="10" Opacity="0.5"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Column="1">
+            <!-- Demo List View (when no demo selected) -->
+            <ScrollViewer IsVisible="{Binding SelectedDemo, Converter={x:Static ObjectConverters.IsNull}}">
+                <StackPanel Margin="32" Spacing="24">
+                    <!-- Welcome Section (only when on home with no search) -->
+                    <Border Background="{DynamicResource SystemAccentColorLight2}"
+                            CornerRadius="12" Padding="32,24"
+                            IsVisible="{Binding SelectedCategory, Converter={x:Static ObjectConverters.IsNull}}">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="Welcome to SkiaCharts Gallery"
+                                       FontSize="28" FontWeight="Bold" />
+                            <TextBlock TextWrapping="Wrap" FontSize="14" Opacity="0.9">
+                                <Run Text="Explore " />
+                                <Run Text="{Binding FilteredDemos.Count}" FontWeight="Bold" />
+                                <Run Text=" interactive chart demos across " />
+                                <Run Text="{Binding Categories.Count}" FontWeight="Bold" />
+                                <Run Text=" categories. SkiaCharts is a high-performance charting library built with SkiaSharp for cross-platform applications." />
+                            </TextBlock>
+
+                            <!-- Quick Stats -->
+                            <ItemsControl ItemsSource="{Binding Categories}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                                CornerRadius="8" Padding="12,8" Margin="0,0,8,8">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="{Binding Icon}" FontSize="16" />
+                                                <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding Demos.Count, StringFormat='({0})'}"
+                                                           FontSize="12" Opacity="0.7" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Text="💡 Tip: Use the search box or browse categories to find specific chart types"
+                                       FontSize="12" Opacity="0.8" FontStyle="Italic" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Header -->
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{Binding SelectedCategory.Name, FallbackValue='All Demos'}"
+                                   FontSize="32" FontWeight="Bold" />
+                        <TextBlock Text="{Binding SelectedCategory.Description, FallbackValue='Browse all available chart demos and examples'}"
+                                   FontSize="16" Opacity="0.7"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <!-- Demo Grid -->
+                    <ItemsControl ItemsSource="{Binding FilteredDemos}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Classes="demo-card"
+                                        Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).NavigateToDemoCommand}"
+                                        CommandParameter="{Binding}"
+                                        Width="350" Height="180"
+                                        Margin="0,0,16,16">
+                                    <Border CornerRadius="8" Padding="20">
+                                        <StackPanel Spacing="12">
+                                            <TextBlock Text="{Binding Title}"
+                                                       FontSize="18" FontWeight="SemiBold"
+                                                       TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding Description}"
+                                                       FontSize="13" Opacity="0.7"
+                                                       TextWrapping="Wrap"
+                                                       MaxHeight="60" />
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Border Background="{DynamicResource SystemAccentColorLight1}"
+                                                        CornerRadius="12" Padding="8,4">
+                                                    <TextBlock Text="{Binding Difficulty, StringFormat='Level {0}'}"
+                                                               FontSize="11" />
+                                                </Border>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- No Results Message -->
+                    <TextBlock Text="No demos found matching your search."
+                               FontSize="16" Opacity="0.5"
+                               HorizontalAlignment="Center"
+                               Margin="0,40"
+                               IsVisible="{Binding FilteredDemos.Count, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=0}" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Demo Detail View (when demo selected) -->
+            <Grid IsVisible="{Binding SelectedDemo, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <Grid RowDefinitions="Auto,*">
+                    <!-- Back Button -->
+                    <Border Grid.Row="0" Padding="16" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+                        <Button Content="← Back to Demos"
+                                Command="{Binding NavigateToHomeCommand}"
+                                Classes="back-button" />
+                    </Border>
+
+                    <!-- Demo Content -->
+                    <ScrollViewer Grid.Row="1" Padding="32">
+                        <StackPanel Spacing="24">
+                            <!-- Demo Header -->
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="{Binding SelectedDemo.Title}"
+                                           FontSize="32" FontWeight="Bold" />
+                                <TextBlock Text="{Binding SelectedDemo.Description}"
+                                           FontSize="16" Opacity="0.7"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <!-- Demo Content Placeholder -->
+                            <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                                    CornerRadius="8" Padding="32"
+                                    MinHeight="400">
+                                <ContentControl Content="{Binding CurrentViewModel}" />
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+
+    <!-- Styles -->
+    <Window.Styles>
+        <Style Selector="Button.nav-button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="Margin" Value="4,2" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+        <Style Selector="Button.nav-button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SystemControlHighlightListLowBrush}" />
+        </Style>
+        <Style Selector="Button.nav-button:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SystemControlHighlightListMediumBrush}" />
+        </Style>
+
+        <Style Selector="Button.demo-card">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAltHighBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseLowColor}" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="Button.demo-card:pointerover">
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColor}" />
+        </Style>
+        <Style Selector="Button.demo-card:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SystemControlHighlightAltListAccentLowBrush}" />
+        </Style>
+
+        <Style Selector="Button.back-button">
+            <Setter Property="Padding" Value="16,8" />
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+    </Window.Styles>
+
+    <!-- Resources -->
+    <Window.Resources>
+        <ResourceDictionary>
+            <!-- Bool to Width Converter (simplified) -->
+        </ResourceDictionary>
+    </Window.Resources>
+
+</Window>

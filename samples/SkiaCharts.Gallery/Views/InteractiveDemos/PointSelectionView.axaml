@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SkiaCharts.Gallery.ViewModels.InteractiveDemos"
+             xmlns:controls="using:SkiaCharts.Avalonia.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="SkiaCharts.Gallery.Views.InteractiveDemos.PointSelectionView"
+             x:DataType="vm:PointSelectionViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <Border Grid.Row="0" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                Padding="20,16" Margin="0,0,0,16">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Point Selection"
+                           FontSize="24" FontWeight="SemiBold" />
+                <TextBlock Text="Interactive chart demonstrating point selection functionality. Click on data points to view their values and coordinates."
+                           FontSize="14" Opacity="0.7"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                Padding="16,12" Margin="20,0,20,16" CornerRadius="6">
+            <TextBlock Text="{Binding SelectedPoint}"
+                       FontSize="16" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" />
+        </Border>
+
+        <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                CornerRadius="8" Padding="20" Margin="20">
+            <controls:SkiaChartView Chart="{Binding Chart}" />
+        </Border>
+    </Grid>
+
+</UserControl>

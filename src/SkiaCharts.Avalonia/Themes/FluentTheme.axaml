@@ -1,0 +1,54 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:SkiaCharts.Avalonia.Controls">
+
+    <!-- Include Base Resources -->
+    <Styles.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Themes/ChartResources.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Styles.Resources>
+
+    <!-- FluentTheme Light Overrides -->
+    <Style Selector=":is(controls|SkiaChartView)">
+        <Style.Resources>
+            <!-- Override resources to match Fluent Light theme -->
+            <SolidColorBrush x:Key="ChartBackgroundBrush" Color="{DynamicResource SystemChromeLowColor}" />
+            <SolidColorBrush x:Key="ChartBorderBrush" Color="{DynamicResource SystemBaseMediumLowColor}" />
+            <SolidColorBrush x:Key="ChartGridBrush" Color="{DynamicResource SystemBaseLowColor}" />
+            <SolidColorBrush x:Key="ChartTextBrush" Color="{DynamicResource SystemBaseHighColor}" />
+        </Style.Resources>
+    </Style>
+
+    <!-- FluentTheme Dark Overrides -->
+    <Style Selector=":is(controls|SkiaChartView).fluent-dark">
+        <Style.Resources>
+            <SolidColorBrush x:Key="ChartBackgroundBrush" Color="#202020" />
+            <SolidColorBrush x:Key="ChartBorderBrush" Color="#404040" />
+            <SolidColorBrush x:Key="ChartGridBrush" Color="#2A2A2A" />
+            <SolidColorBrush x:Key="ChartTextBrush" Color="#E0E0E0" />
+        </Style.Resources>
+    </Style>
+
+    <!-- FluentTheme-specific SkiaChartView styling -->
+    <Style Selector="controls|SkiaChartView">
+        <Setter Property="Background" Value="{DynamicResource ChartBackgroundBrush}" />
+    </Style>
+
+    <!-- Fluent Light Theme -->
+    <Style Selector="controls|SkiaChartView.fluent-light">
+        <Setter Property="Background" Value="#FAFAFA" />
+    </Style>
+
+    <!-- Fluent Dark Theme -->
+    <Style Selector="controls|SkiaChartView.fluent-dark">
+        <Setter Property="Background" Value="#202020" />
+    </Style>
+
+    <!-- Disabled State with Fluent opacity -->
+    <Style Selector="controls|SkiaChartView:disabled">
+        <Setter Property="Opacity" Value="0.38" />
+    </Style>
+</Styles>

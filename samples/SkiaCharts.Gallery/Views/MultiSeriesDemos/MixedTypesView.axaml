@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SkiaCharts.Gallery.ViewModels.MultiSeriesDemos"
+             xmlns:controls="using:SkiaCharts.Avalonia.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="SkiaCharts.Gallery.Views.MultiSeriesDemos.MixedTypesView"
+             x:DataType="vm:MixedTypesViewModel">
+
+    <Grid RowDefinitions="Auto,*">
+        <Border Grid.Row="0" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                Padding="20,16" Margin="0,0,0,16">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Mixed Chart Types"
+                           FontSize="24" FontWeight="SemiBold" />
+                <TextBlock Text="Combining different chart types (line, bar, and area) in a single view to compare different aspects of data."
+                           FontSize="14" Opacity="0.7"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="1" RowDefinitions="*,*,*" Margin="20">
+            <Border Grid.Row="0" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    CornerRadius="8" Padding="20" Margin="0,0,0,8">
+                <controls:SkiaChartView Chart="{Binding LineChart}" />
+            </Border>
+
+            <Border Grid.Row="1" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    CornerRadius="8" Padding="20" Margin="0,4">
+                <controls:SkiaChartView Chart="{Binding BarChart}" />
+            </Border>
+
+            <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                    CornerRadius="8" Padding="20" Margin="0,8,0,0">
+                <controls:SkiaChartView Chart="{Binding AreaChart}" />
+            </Border>
+        </Grid>
+    </Grid>
+
+</UserControl>

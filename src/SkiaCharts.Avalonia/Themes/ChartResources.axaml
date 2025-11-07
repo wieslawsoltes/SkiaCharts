@@ -1,0 +1,98 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Chart Background Colors -->
+    <SolidColorBrush x:Key="ChartBackgroundBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ChartBackgroundBrushDark" Color="#1E1E1E" />
+    <SolidColorBrush x:Key="ChartBackgroundBrushLight" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ChartBackgroundBrushProfessional" Color="#F5F5F5" />
+    <SolidColorBrush x:Key="ChartBackgroundBrushHighContrast" Color="#000000" />
+
+    <!-- Chart Border Colors -->
+    <SolidColorBrush x:Key="ChartBorderBrush" Color="#E0E0E0" />
+    <SolidColorBrush x:Key="ChartBorderBrushDark" Color="#404040" />
+    <SolidColorBrush x:Key="ChartBorderBrushLight" Color="#E0E0E0" />
+    <SolidColorBrush x:Key="ChartBorderBrushProfessional" Color="#CCCCCC" />
+    <SolidColorBrush x:Key="ChartBorderBrushHighContrast" Color="#FFFFFF" />
+
+    <!-- Grid Line Colors -->
+    <SolidColorBrush x:Key="ChartGridBrush" Color="#F0F0F0" />
+    <SolidColorBrush x:Key="ChartGridBrushDark" Color="#2A2A2A" />
+    <SolidColorBrush x:Key="ChartGridBrushLight" Color="#F0F0F0" />
+    <SolidColorBrush x:Key="ChartGridBrushProfessional" Color="#E8E8E8" />
+    <SolidColorBrush x:Key="ChartGridBrushHighContrast" Color="#808080" />
+
+    <!-- Text Colors -->
+    <SolidColorBrush x:Key="ChartTextBrush" Color="#333333" />
+    <SolidColorBrush x:Key="ChartTextBrushDark" Color="#E0E0E0" />
+    <SolidColorBrush x:Key="ChartTextBrushLight" Color="#333333" />
+    <SolidColorBrush x:Key="ChartTextBrushProfessional" Color="#2C2C2C" />
+    <SolidColorBrush x:Key="ChartTextBrushHighContrast" Color="#FFFFFF" />
+
+    <!-- Series Colors (8-color palette) -->
+    <SolidColorBrush x:Key="ChartSeries1Brush" Color="#2E93fA" />
+    <SolidColorBrush x:Key="ChartSeries2Brush" Color="#66DA26" />
+    <SolidColorBrush x:Key="ChartSeries3Brush" Color="#546E7A" />
+    <SolidColorBrush x:Key="ChartSeries4Brush" Color="#E91E63" />
+    <SolidColorBrush x:Key="ChartSeries5Brush" Color="#FF9800" />
+    <SolidColorBrush x:Key="ChartSeries6Brush" Color="#00E396" />
+    <SolidColorBrush x:Key="ChartSeries7Brush" Color="#775DD0" />
+    <SolidColorBrush x:Key="ChartSeries8Brush" Color="#FEB019" />
+
+    <!-- Legend Colors -->
+    <SolidColorBrush x:Key="ChartLegendBackgroundBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ChartLegendBackgroundBrushDark" Color="#2A2A2A" />
+    <SolidColorBrush x:Key="ChartLegendBorderBrush" Color="#E0E0E0" />
+    <SolidColorBrush x:Key="ChartLegendBorderBrushDark" Color="#404040" />
+
+    <!-- Tooltip Colors -->
+    <SolidColorBrush x:Key="ChartTooltipBackgroundBrush" Color="#333333" />
+    <SolidColorBrush x:Key="ChartTooltipTextBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ChartTooltipBorderBrush" Color="#666666" />
+
+    <!-- Selection Colors -->
+    <SolidColorBrush x:Key="ChartSelectionBrush" Color="#4D2E93fA" />
+    <SolidColorBrush x:Key="ChartSelectionBorderBrush" Color="#2E93fA" />
+
+    <!-- Crosshair Colors -->
+    <SolidColorBrush x:Key="ChartCrosshairBrush" Color="#666666" />
+    <SolidColorBrush x:Key="ChartCrosshairBrushDark" Color="#999999" />
+
+    <!-- Chart Dimensions -->
+    <x:Double x:Key="ChartDefaultWidth">400</x:Double>
+    <x:Double x:Key="ChartDefaultHeight">300</x:Double>
+    <x:Double x:Key="ChartMinWidth">100</x:Double>
+    <x:Double x:Key="ChartMinHeight">100</x:Double>
+
+    <!-- Chart Spacing -->
+    <Thickness x:Key="ChartPadding">8</Thickness>
+    <Thickness x:Key="ChartBorderThickness">1</Thickness>
+    <CornerRadius x:Key="ChartCornerRadius">4</CornerRadius>
+
+    <!-- Line Widths -->
+    <x:Double x:Key="ChartDefaultLineWidth">2.0</x:Double>
+    <x:Double x:Key="ChartThickLineWidth">3.0</x:Double>
+    <x:Double x:Key="ChartThinLineWidth">1.0</x:Double>
+
+    <!-- Marker Sizes -->
+    <x:Double x:Key="ChartDefaultMarkerSize">6.0</x:Double>
+    <x:Double x:Key="ChartLargeMarkerSize">8.0</x:Double>
+    <x:Double x:Key="ChartSmallMarkerSize">4.0</x:Double>
+
+    <!-- Animation Durations (in milliseconds) -->
+    <x:Double x:Key="ChartDefaultAnimationDuration">500</x:Double>
+    <x:Double x:Key="ChartFastAnimationDuration">250</x:Double>
+    <x:Double x:Key="ChartSlowAnimationDuration">1000</x:Double>
+
+    <!-- Font Sizes -->
+    <x:Double x:Key="ChartTitleFontSize">18</x:Double>
+    <x:Double x:Key="ChartSubtitleFontSize">14</x:Double>
+    <x:Double x:Key="ChartLabelFontSize">12</x:Double>
+    <x:Double x:Key="ChartLegendFontSize">11</x:Double>
+    <x:Double x:Key="ChartTooltipFontSize">11</x:Double>
+
+    <!-- Font Weights -->
+    <FontWeight x:Key="ChartTitleFontWeight">Bold</FontWeight>
+    <FontWeight x:Key="ChartSubtitleFontWeight">Normal</FontWeight>
+    <FontWeight x:Key="ChartLabelFontWeight">Normal</FontWeight>
+</ResourceDictionary>

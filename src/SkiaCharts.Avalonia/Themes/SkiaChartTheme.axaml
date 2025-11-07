@@ -1,0 +1,58 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:SkiaCharts.Avalonia.Controls">
+
+    <!-- Default ControlTheme for SkiaChartView -->
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <controls:SkiaChartView Width="400" Height="300" />
+        </Border>
+    </Design.PreviewWith>
+
+    <!-- SkiaChartView Default Style -->
+    <Style Selector="controls|SkiaChartView">
+        <Setter Property="Background" Value="{DynamicResource ChartBackgroundBrush}" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="EnableAntiAliasing" Value="True" />
+        <Setter Property="EnableAnimations" Value="True" />
+        <Setter Property="AnimationDuration" Value="0:0:0.5" />
+        <Setter Property="ShowLegend" Value="True" />
+        <Setter Property="ShowGrid" Value="True" />
+        <Setter Property="ShowMarkers" Value="True" />
+        <Setter Property="LineWidth" Value="2.0" />
+        <Setter Property="MarkerSize" Value="6.0" />
+        <Setter Property="EnableTooltips" Value="True" />
+        <Setter Property="EnableZoom" Value="True" />
+        <Setter Property="EnablePan" Value="True" />
+    </Style>
+
+    <!-- Light Theme Variant -->
+    <Style Selector="controls|SkiaChartView.light">
+        <Setter Property="Background" Value="#FFFFFF" />
+    </Style>
+
+    <!-- Dark Theme Variant -->
+    <Style Selector="controls|SkiaChartView.dark">
+        <Setter Property="Background" Value="#1E1E1E" />
+    </Style>
+
+    <!-- Professional Theme Variant -->
+    <Style Selector="controls|SkiaChartView.professional">
+        <Setter Property="Background" Value="#F5F5F5" />
+    </Style>
+
+    <!-- High Contrast Theme Variant -->
+    <Style Selector="controls|SkiaChartView.highcontrast">
+        <Setter Property="Background" Value="#000000" />
+    </Style>
+
+    <!-- Disabled State -->
+    <Style Selector="controls|SkiaChartView:disabled">
+        <Setter Property="Opacity" Value="0.5" />
+    </Style>
+
+    <!-- Pointer Over State -->
+    <Style Selector="controls|SkiaChartView:pointerover">
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+</Styles>
