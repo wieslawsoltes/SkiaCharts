@@ -110,7 +110,7 @@ public class LinearAxis : IAxis
     {
         if (!string.IsNullOrEmpty(LabelFormat))
         {
-            return value.ToString(LabelFormat);
+            return value.ToString(LabelFormat, System.Globalization.CultureInfo.InvariantCulture);
         }
 
         // Auto-format based on magnitude
@@ -124,19 +124,19 @@ public class LinearAxis : IAxis
 
         if (absValue < 0.01 || absValue >= 10000)
         {
-            return value.ToString("E2");
+            return value.ToString("E2", System.Globalization.CultureInfo.InvariantCulture);
         }
         else if (absValue < 1)
         {
-            return value.ToString("F3");
+            return value.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
         }
         else if (absValue < 100)
         {
-            return value.ToString("F2");
+            return value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
         }
         else
         {
-            return value.ToString("F0");
+            return value.ToString("F0", System.Globalization.CultureInfo.InvariantCulture);
         }
     }
 

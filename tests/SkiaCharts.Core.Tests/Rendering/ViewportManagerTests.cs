@@ -83,4 +83,29 @@ public class ViewportManagerTests
         Assert.Equal(20, viewport.YDataRange.Min);
         Assert.Equal(120, viewport.YDataRange.Max);
     }
+
+    [Fact]
+    public void ViewportManager_ShouldTransformLogarithmicAxis()
+    {
+        // Arrange
+        var viewport = new ViewportManager
+        {
+            XDataRange = new DataRange(1, 1000),
+            YDataRange = new DataRange(1, 1000),
+            ScreenRect = new SKRect(0, 0, 300, 300)
+        };
+
+        viewport.SetXTransform(Math.Log10, value => Math.Pow(10, value));
+        viewport.SetYTransform(Math.Log10, value => Math.Pow(10, value));
+
+        // Act
+        var screenPoint = viewport.DataToScreen(10, 10);
+        var (dataX, dataY) = viewport.ScreenToData(screenPoint.X, screenPoint.Y);
+
+        // Assert
+        Assert.Equal(100, screenPoint.X, 1);
+        Assert.Equal(200, screenPoint.Y, 1);
+        Assert.InRange(dataX, 9.9, 10.1);
+        Assert.InRange(dataY, 9.9, 10.1);
+    }
 }

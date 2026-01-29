@@ -65,15 +65,50 @@ public class AreaChart : ChartBase
             }
             else
             {
-                foreach (var series in Series)
+                for (int seriesIndex = 0; seriesIndex < Series.Count; seriesIndex++)
                 {
+                    var series = Series[seriesIndex];
                     if (series.Count > 0)
                     {
                         var style = GetSeriesStyle(series);
-                        queue.Add(new AreaRenderer(series, this, style));
+                        queue.Add(new AreaRenderer(series, this, style, seriesIndex));
                     }
                 }
             }
+        }
+    }
+
+    /// <inheritdoc/>
+    protected override IEnumerable<SkiaCharts.Core.Legend.LegendItem> BuildLegendItems(SkiaCharts.Core.Theming.ChartTheme theme)
+    {
+        for (int index = 0; index < Series.Count; index++)
+        {
+            var series = Series[index];
+            var style = GetSeriesStyle(series);
+
+            var name = string.IsNullOrWhiteSpace(series.Name)
+                ? $"Series {index + 1}"
+                : series.Name!;
+
+            var patternType = style.FillPattern;
+            var patternScale = style.PatternScale;
+
+            if (!patternType.HasValue && (Accessibility.UsePatternFills || IsPatternFillTheme))
+            {
+                patternType = SkiaCharts.Core.Theming.PatternFills.GetCategoricalPattern(index);
+                patternScale = Accessibility.PatternScale;
+            }
+
+            yield return new SkiaCharts.Core.Legend.LegendItem
+            {
+                Text = name,
+                Color = style.FillColor,
+                SymbolType = SkiaCharts.Core.Legend.LegendSymbolType.Rectangle,
+                Data = series,
+                PatternType = patternType,
+                PatternScale = patternScale,
+                PatternBackgroundColor = BackgroundColor
+            };
         }
     }
 
@@ -82,12 +117,14 @@ public class AreaChart : ChartBase
         private readonly IDataSeries<IDataPoint> _series;
         private readonly AreaChart _chart;
         private readonly AreaSeriesStyle _style;
+        private readonly int _seriesIndex;
 
-        public AreaRenderer(IDataSeries<IDataPoint> series, AreaChart chart, AreaSeriesStyle style)
+        public AreaRenderer(IDataSeries<IDataPoint> series, AreaChart chart, AreaSeriesStyle style, int seriesIndex)
         {
             _series = series;
             _chart = chart;
             _style = style;
+            _seriesIndex = seriesIndex;
             Layer = RenderLayer.Data;
         }
 
@@ -117,14 +154,21 @@ public class AreaChart : ChartBase
                 IsAntialias = true
             };
 
-            // Apply gradient or solid fill
-            if (_style.GradientColors != null && _style.GradientColors.Length >= 2)
+            var fillColor = _style.FillColor.WithAlpha(_style.FillAlpha);
+
+            // Apply pattern, gradient, or solid fill
+            var patternScale = _style.FillPattern.HasValue ? _style.PatternScale : null;
+            if (_chart.TryApplyPatternFill(fillPaint, _seriesIndex, fillColor, _style.FillPattern, patternScale))
+            {
+                // Pattern fill applied via shader.
+            }
+            else if (_style.GradientColors != null && _style.GradientColors.Length >= 2)
             {
                 ApplyGradient(fillPaint, context);
             }
             else
             {
-                fillPaint.Color = _style.FillColor.WithAlpha(_style.FillAlpha);
+                fillPaint.Color = fillColor;
             }
 
             context.DrawPath(path, fillPaint);
@@ -439,12 +483,13 @@ public class AreaChart : ChartBase
             }
 
             // Render each area stacked on previous
-            foreach (var series in _allSeries)
+            for (int seriesIndex = 0; seriesIndex < _allSeries.Count; seriesIndex++)
             {
+                var series = _allSeries[seriesIndex];
                 if (series.Count < 2) continue;
 
                 var style = _chart.GetSeriesStyle(series);
-                RenderStackedArea(context, series, sortedX, cumulativeData, style);
+                RenderStackedArea(context, series, sortedX, cumulativeData, style, seriesIndex);
 
                 // Update cumulative values
                 foreach (var point in series)
@@ -462,7 +507,8 @@ public class AreaChart : ChartBase
             IDataSeries<IDataPoint> series,
             List<double> sortedX,
             Dictionary<double, double> cumulativeData,
-            AreaSeriesStyle style)
+            AreaSeriesStyle style,
+            int seriesIndex)
         {
             using var path = new SKPath();
 
@@ -498,13 +544,20 @@ public class AreaChart : ChartBase
                 IsAntialias = true
             };
 
-            if (style.GradientColors != null && style.GradientColors.Length >= 2)
+            var fillColor = style.FillColor.WithAlpha(style.FillAlpha);
+
+            var patternScale = style.FillPattern.HasValue ? style.PatternScale : null;
+            if (_chart.TryApplyPatternFill(fillPaint, seriesIndex, fillColor, style.FillPattern, patternScale))
+            {
+                // Pattern fill applied via shader.
+            }
+            else if (style.GradientColors != null && style.GradientColors.Length >= 2)
             {
                 ApplyGradient(fillPaint, context, style);
             }
             else
             {
-                fillPaint.Color = style.FillColor.WithAlpha(style.FillAlpha);
+                fillPaint.Color = fillColor;
             }
 
             context.DrawPath(path, fillPaint);

@@ -1,3 +1,4 @@
+using SkiaCharts.Core.Theming;
 using SkiaSharp;
 
 namespace SkiaCharts.Core.Legend;
@@ -388,6 +389,17 @@ public class LegendManager
                 IsAntialias = true
             };
 
+            SKShader? patternShader = null;
+            if (item.PatternType.HasValue && item.SymbolType != LegendSymbolType.Line)
+            {
+                var background = item.PatternBackgroundColor ?? BackgroundColor;
+                background = new SKColor(background.Red, background.Green, background.Blue, alpha);
+
+                var patternScale = item.PatternScale <= 0 ? 1.0f : item.PatternScale;
+                patternShader = PatternFills.CreatePattern(item.PatternType.Value, symbolColor, background, patternScale);
+                symbolPaint.Shader = patternShader;
+            }
+
             switch (item.SymbolType)
             {
                 case LegendSymbolType.Rectangle:
@@ -402,6 +414,8 @@ public class LegendManager
                     canvas.DrawLine(symbolRect.Left, symbolRect.MidY, symbolRect.Right, symbolRect.MidY, symbolPaint);
                     break;
             }
+
+            patternShader?.Dispose();
 
             // Draw text
             var textX = symbolX + SymbolSize + SymbolTextSpacing;
@@ -463,6 +477,21 @@ public class LegendItem
     /// Gets or sets associated data (e.g., series object).
     /// </summary>
     public object? Data { get; init; }
+
+    /// <summary>
+    /// Gets or sets the optional pattern type for symbol fills.
+    /// </summary>
+    public PatternType? PatternType { get; init; }
+
+    /// <summary>
+    /// Gets or sets the pattern scale factor for symbol fills.
+    /// </summary>
+    public float PatternScale { get; init; } = 1.0f;
+
+    /// <summary>
+    /// Gets or sets the pattern background color for symbol fills.
+    /// </summary>
+    public SKColor? PatternBackgroundColor { get; init; }
 
     /// <summary>
     /// Gets the calculated bounds.

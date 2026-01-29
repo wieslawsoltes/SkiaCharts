@@ -12,7 +12,7 @@ public abstract class StreamingDataSourceBase : IStreamingDataSource
     private readonly object _stateLock = new();
     private CancellationTokenSource? _cancellationTokenSource;
     private Task? _streamingTask;
-    private readonly Stopwatch _throttleStopwatch = new();
+    private long _lastUpdateTimestamp;
     private double _minUpdateInterval; // milliseconds
     private bool _disposed;
 
@@ -87,7 +87,7 @@ public abstract class StreamingDataSourceBase : IStreamingDataSource
             State = StreamingState.Connected;
 
             // Start streaming loop
-            _throttleStopwatch.Start();
+            _lastUpdateTimestamp = 0;
             _streamingTask = StreamDataAsync(_cancellationTokenSource.Token);
         }
         catch (Exception ex)
@@ -120,7 +120,7 @@ public abstract class StreamingDataSourceBase : IStreamingDataSource
 
         await DisconnectAsync();
         State = StreamingState.Disconnected;
-        _throttleStopwatch.Stop();
+        _lastUpdateTimestamp = 0;
     }
 
     /// <inheritdoc/>
@@ -153,14 +153,19 @@ public abstract class StreamingDataSourceBase : IStreamingDataSource
         // Rate limiting - check if enough time has passed
         if (MaxUpdateFrequency > 0)
         {
-            var elapsed = _throttleStopwatch.Elapsed.TotalMilliseconds;
-            if (elapsed < _minUpdateInterval)
+            var now = Stopwatch.GetTimestamp();
+
+            if (_lastUpdateTimestamp != 0)
             {
-                // Too soon, skip this update
-                return;
+                var elapsedMs = (now - _lastUpdateTimestamp) * 1000.0 / Stopwatch.Frequency;
+                if (elapsedMs < _minUpdateInterval)
+                {
+                    // Too soon, skip this update
+                    return;
+                }
             }
 
-            _throttleStopwatch.Restart();
+            _lastUpdateTimestamp = now;
         }
 
         DataReceived?.Invoke(this, new DataPointsEventArgs(points));

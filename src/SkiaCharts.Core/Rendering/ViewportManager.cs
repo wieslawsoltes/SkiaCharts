@@ -12,6 +12,12 @@ public class ViewportManager
     private DataRange _xDataRange;
     private DataRange _yDataRange;
     private SKRect _screenRect;
+    private Func<double, double>? _xTransform;
+    private Func<double, double>? _xInverseTransform;
+    private Func<double, double>? _yTransform;
+    private Func<double, double>? _yInverseTransform;
+    private double _xTransformMin;
+    private double _yTransformMin;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ViewportManager"/> class.
@@ -21,6 +27,8 @@ public class ViewportManager
         _xDataRange = new DataRange(0, 1);
         _yDataRange = new DataRange(0, 1);
         _screenRect = new SKRect(0, 0, 100, 100);
+        _xTransformMin = 0;
+        _yTransformMin = 0;
     }
 
     /// <summary>
@@ -83,6 +91,30 @@ public class ViewportManager
     public float OffsetY { get; private set; }
 
     /// <summary>
+    /// Sets a custom transformation for the X axis (e.g., log scale).
+    /// </summary>
+    /// <param name="transform">Transform applied to data values.</param>
+    /// <param name="inverseTransform">Inverse transform applied to screen-to-data conversions.</param>
+    public void SetXTransform(Func<double, double>? transform, Func<double, double>? inverseTransform)
+    {
+        _xTransform = transform;
+        _xInverseTransform = inverseTransform;
+        UpdateTransform();
+    }
+
+    /// <summary>
+    /// Sets a custom transformation for the Y axis (e.g., log scale).
+    /// </summary>
+    /// <param name="transform">Transform applied to data values.</param>
+    /// <param name="inverseTransform">Inverse transform applied to screen-to-data conversions.</param>
+    public void SetYTransform(Func<double, double>? transform, Func<double, double>? inverseTransform)
+    {
+        _yTransform = transform;
+        _yInverseTransform = inverseTransform;
+        UpdateTransform();
+    }
+
+    /// <summary>
     /// Transforms a data point to screen coordinates.
     /// </summary>
     /// <param name="dataX">The data X coordinate.</param>
@@ -90,8 +122,16 @@ public class ViewportManager
     /// <returns>The screen coordinates.</returns>
     public SKPoint DataToScreen(double dataX, double dataY)
     {
-        var screenX = _screenRect.Left + (float)((dataX - _xDataRange.Min) * ScaleX);
-        var screenY = _screenRect.Bottom - (float)((dataY - _yDataRange.Min) * ScaleY);
+        var transformedX = ApplyTransformX(dataX);
+        var transformedY = ApplyTransformY(dataY);
+
+        if (!double.IsFinite(transformedX) || !double.IsFinite(transformedY))
+        {
+            return new SKPoint(float.NaN, float.NaN);
+        }
+
+        var screenX = _screenRect.Left + (float)((transformedX - _xTransformMin) * ScaleX);
+        var screenY = _screenRect.Bottom - (float)((transformedY - _yTransformMin) * ScaleY);
         return new SKPoint(screenX, screenY);
     }
 
@@ -103,8 +143,12 @@ public class ViewportManager
     /// <returns>The data coordinates.</returns>
     public (double dataX, double dataY) ScreenToData(float screenX, float screenY)
     {
-        var dataX = _xDataRange.Min + (screenX - _screenRect.Left) / ScaleX;
-        var dataY = _yDataRange.Min + (_screenRect.Bottom - screenY) / ScaleY;
+        var normalizedX = ScaleX == 0 ? 0 : (screenX - _screenRect.Left) / ScaleX;
+        var normalizedY = ScaleY == 0 ? 0 : (_screenRect.Bottom - screenY) / ScaleY;
+        var transformedX = _xTransformMin + normalizedX;
+        var transformedY = _yTransformMin + normalizedY;
+        var dataX = ApplyInverseTransformX(transformedX);
+        var dataY = ApplyInverseTransformY(transformedY);
         return (dataX, dataY);
     }
 
@@ -115,7 +159,13 @@ public class ViewportManager
     /// <returns>The screen X coordinate.</returns>
     public float DataToScreenX(double dataX)
     {
-        return _screenRect.Left + (float)((dataX - _xDataRange.Min) * ScaleX);
+        var transformedX = ApplyTransformX(dataX);
+        if (!double.IsFinite(transformedX))
+        {
+            return float.NaN;
+        }
+
+        return _screenRect.Left + (float)((transformedX - _xTransformMin) * ScaleX);
     }
 
     /// <summary>
@@ -125,7 +175,13 @@ public class ViewportManager
     /// <returns>The screen Y coordinate.</returns>
     public float DataToScreenY(double dataY)
     {
-        return _screenRect.Bottom - (float)((dataY - _yDataRange.Min) * ScaleY);
+        var transformedY = ApplyTransformY(dataY);
+        if (!double.IsFinite(transformedY))
+        {
+            return float.NaN;
+        }
+
+        return _screenRect.Bottom - (float)((transformedY - _yTransformMin) * ScaleY);
     }
 
     /// <summary>
@@ -135,7 +191,9 @@ public class ViewportManager
     /// <returns>The data X coordinate.</returns>
     public double ScreenToDataX(float screenX)
     {
-        return _xDataRange.Min + (screenX - _screenRect.Left) / ScaleX;
+        var normalizedX = ScaleX == 0 ? 0 : (screenX - _screenRect.Left) / ScaleX;
+        var transformedX = _xTransformMin + normalizedX;
+        return ApplyInverseTransformX(transformedX);
     }
 
     /// <summary>
@@ -145,7 +203,9 @@ public class ViewportManager
     /// <returns>The data Y coordinate.</returns>
     public double ScreenToDataY(float screenY)
     {
-        return _yDataRange.Min + (_screenRect.Bottom - screenY) / ScaleY;
+        var normalizedY = ScaleY == 0 ? 0 : (_screenRect.Bottom - screenY) / ScaleY;
+        var transformedY = _yTransformMin + normalizedY;
+        return ApplyInverseTransformY(transformedY);
     }
 
     /// <summary>
@@ -202,25 +262,67 @@ public class ViewportManager
 
     private void UpdateTransform()
     {
-        if (_xDataRange.Span > 0)
+        var xMin = ApplyTransformX(_xDataRange.Min);
+        var xMax = ApplyTransformX(_xDataRange.Max);
+
+        if (!double.IsFinite(xMin) || !double.IsFinite(xMax))
         {
-            ScaleX = (float)(_screenRect.Width / _xDataRange.Span);
-        }
-        else
-        {
+            _xTransformMin = 0;
             ScaleX = 1;
         }
-
-        if (_yDataRange.Span > 0)
+        else
         {
-            ScaleY = (float)(_screenRect.Height / _yDataRange.Span);
+            if (xMax < xMin)
+            {
+                (xMin, xMax) = (xMax, xMin);
+            }
+
+            _xTransformMin = xMin;
+            var xSpan = xMax - xMin;
+            ScaleX = xSpan != 0 ? (float)(_screenRect.Width / xSpan) : 1;
+        }
+
+        var yMin = ApplyTransformY(_yDataRange.Min);
+        var yMax = ApplyTransformY(_yDataRange.Max);
+
+        if (!double.IsFinite(yMin) || !double.IsFinite(yMax))
+        {
+            _yTransformMin = 0;
+            ScaleY = 1;
         }
         else
         {
-            ScaleY = 1;
+            if (yMax < yMin)
+            {
+                (yMin, yMax) = (yMax, yMin);
+            }
+
+            _yTransformMin = yMin;
+            var ySpan = yMax - yMin;
+            ScaleY = ySpan != 0 ? (float)(_screenRect.Height / ySpan) : 1;
         }
 
         OffsetX = _screenRect.Left;
         OffsetY = _screenRect.Top;
+    }
+
+    private double ApplyTransformX(double value)
+    {
+        return _xTransform == null ? value : _xTransform(value);
+    }
+
+    private double ApplyTransformY(double value)
+    {
+        return _yTransform == null ? value : _yTransform(value);
+    }
+
+    private double ApplyInverseTransformX(double value)
+    {
+        return _xInverseTransform == null ? value : _xInverseTransform(value);
+    }
+
+    private double ApplyInverseTransformY(double value)
+    {
+        return _yInverseTransform == null ? value : _yInverseTransform(value);
     }
 }

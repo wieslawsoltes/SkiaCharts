@@ -5,6 +5,7 @@ using System.Windows.Input;
 using ReactiveUI;
 using SkiaCharts.Core.Charts;
 using SkiaCharts.Core.Data;
+using SkiaCharts.Core.Exporting;
 using SkiaCharts.Core.Theming;
 
 namespace SkiaCharts.Avalonia.ViewModels;
@@ -30,6 +31,12 @@ public class ReactiveChartViewModel : ReactiveObject
     private bool _showMarkers = true;
     private bool _isLoading;
     private string? _errorMessage;
+    private ExportSettings _exportSettings = ExportSettings.ForWeb();
+    private int _exportWidth = 1200;
+    private int _exportHeight = 800;
+    private int _samplePointCount = 50;
+    private int _sampleSeriesCount = 2;
+    private int _sampleSeed = 42;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ReactiveChartViewModel"/> class.
@@ -54,6 +61,11 @@ public class ReactiveChartViewModel : ReactiveObject
         {
             ErrorMessage = ex.Message;
             IsLoading = false;
+        });
+
+        ExportCommand.ThrownExceptions.Subscribe(ex =>
+        {
+            ErrorMessage = ex.Message;
         });
     }
 
@@ -203,6 +215,65 @@ public class ReactiveChartViewModel : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _errorMessage, value);
     }
 
+    /// <summary>
+    /// Gets or sets export settings for chart exports.
+    /// </summary>
+    public ExportSettings ExportSettings
+    {
+        get => _exportSettings;
+        set => this.RaiseAndSetIfChanged(ref _exportSettings, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the export width in pixels (96 DPI).
+    /// </summary>
+    public int ExportWidth
+    {
+        get => _exportWidth;
+        set => this.RaiseAndSetIfChanged(ref _exportWidth, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the export height in pixels (96 DPI).
+    /// </summary>
+    public int ExportHeight
+    {
+        get => _exportHeight;
+        set => this.RaiseAndSetIfChanged(ref _exportHeight, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the number of points generated for sample data.
+    /// </summary>
+    public int SamplePointCount
+    {
+        get => _samplePointCount;
+        set => this.RaiseAndSetIfChanged(ref _samplePointCount, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the number of series generated for sample data.
+    /// </summary>
+    public int SampleSeriesCount
+    {
+        get => _sampleSeriesCount;
+        set => this.RaiseAndSetIfChanged(ref _sampleSeriesCount, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the random seed used for sample data generation.
+    /// </summary>
+    public int SampleSeed
+    {
+        get => _sampleSeed;
+        set => this.RaiseAndSetIfChanged(ref _sampleSeed, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a custom data loader for the LoadData command.
+    /// </summary>
+    public Func<CancellationToken, Task<IReadOnlyList<IDataSeries<IDataPoint>>>>? DataLoader { get; set; }
+
     #endregion
 
     #region Commands
@@ -248,9 +319,21 @@ public class ReactiveChartViewModel : ReactiveObject
 
     private async Task ExecuteExportAsync(string filePath)
     {
-        // Placeholder for export functionality
-        await Task.Delay(100);
-        // TODO: Implement actual export logic
+        if (Chart == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            throw new ArgumentException("Export file path is required.", nameof(filePath));
+        }
+
+        var width = ExportWidth > 0 ? ExportWidth : 1200;
+        var height = ExportHeight > 0 ? ExportHeight : 800;
+        var settings = ExportSettings;
+
+        await Task.Run(() => ChartExporter.Export(Chart, filePath, width, height, settings));
     }
 
     private async Task ExecuteLoadDataAsync()
@@ -260,9 +343,21 @@ public class ReactiveChartViewModel : ReactiveObject
 
         try
         {
-            // Placeholder for data loading
-            await Task.Delay(500);
-            // TODO: Implement actual data loading logic
+            var series = DataLoader != null
+                ? await DataLoader(CancellationToken.None)
+                : CreateSampleSeries();
+
+            if (Chart != null)
+            {
+                Chart.Series.Clear();
+                foreach (var dataSeries in series)
+                {
+                    Chart.Series.Add(dataSeries);
+                }
+            }
+
+            OnSeriesLoaded(series);
+            this.RaisePropertyChanged(nameof(Chart));
         }
         finally
         {
@@ -279,9 +374,8 @@ public class ReactiveChartViewModel : ReactiveObject
         // React to title or subtitle changes
         if (Chart != null)
         {
-            Chart.Title = string.IsNullOrEmpty(Subtitle)
-                ? Title
-                : $"{Title} - {Subtitle}";
+            Chart.Title = Title;
+            Chart.Subtitle = Subtitle;
         }
     }
 
@@ -289,6 +383,57 @@ public class ReactiveChartViewModel : ReactiveObject
     {
         // React to display settings changes
         // Chart will be re-rendered automatically through property notifications
+    }
+
+    #endregion
+
+    #region Data Loading Helpers
+
+    /// <summary>
+    /// Allows derived view models to synchronize their own collections when data is loaded.
+    /// </summary>
+    protected virtual void OnSeriesLoaded(IReadOnlyList<IDataSeries<IDataPoint>> series)
+    {
+        // No-op by default
+    }
+
+    private IReadOnlyList<IDataSeries<IDataPoint>> CreateSampleSeries()
+    {
+        if (Chart is PieChart)
+        {
+            return new[]
+            {
+                new DataSeries<IDataPoint>(new IDataPoint[]
+                {
+                    new PieDataPoint(35, "Product A"),
+                    new PieDataPoint(25, "Product B"),
+                    new PieDataPoint(20, "Product C"),
+                    new PieDataPoint(15, "Product D"),
+                    new PieDataPoint(5, "Other")
+                }, "Series 1")
+            };
+        }
+
+        var random = new Random(SampleSeed);
+        var seriesList = new List<IDataSeries<IDataPoint>>();
+        var seriesCount = Math.Max(1, SampleSeriesCount);
+        var pointCount = Math.Max(2, SamplePointCount);
+
+        for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++)
+        {
+            var points = new List<IDataPoint>(pointCount);
+            var value = random.NextDouble() * 50 + 25 * (seriesIndex + 1);
+
+            for (int i = 0; i < pointCount; i++)
+            {
+                value += (random.NextDouble() - 0.5) * 10;
+                points.Add(new DataPoint(i, Math.Max(0, value)));
+            }
+
+            seriesList.Add(new DataSeries<IDataPoint>(points, $"Series {seriesIndex + 1}"));
+        }
+
+        return seriesList;
     }
 
     #endregion
@@ -348,6 +493,23 @@ public class ReactiveLineChartViewModel : ReactiveChartViewModel
             this.RaisePropertyChanged(nameof(Chart));
         }
     }
+
+    /// <inheritdoc/>
+    protected override void OnSeriesLoaded(IReadOnlyList<IDataSeries<IDataPoint>> series)
+    {
+        Series.Clear();
+        foreach (var dataSeries in series)
+        {
+            if (dataSeries is DataSeries<IDataPoint> typedSeries)
+            {
+                Series.Add(typedSeries);
+            }
+            else
+            {
+                Series.Add(new DataSeries<IDataPoint>(dataSeries, dataSeries.Name));
+            }
+        }
+    }
 }
 
 /// <summary>
@@ -402,6 +564,23 @@ public class ReactiveBarChartViewModel : ReactiveChartViewModel
                 barChart.Series.Add(series);
             }
             this.RaisePropertyChanged(nameof(Chart));
+        }
+    }
+
+    /// <inheritdoc/>
+    protected override void OnSeriesLoaded(IReadOnlyList<IDataSeries<IDataPoint>> series)
+    {
+        Series.Clear();
+        foreach (var dataSeries in series)
+        {
+            if (dataSeries is DataSeries<IDataPoint> typedSeries)
+            {
+                Series.Add(typedSeries);
+            }
+            else
+            {
+                Series.Add(new DataSeries<IDataPoint>(dataSeries, dataSeries.Name));
+            }
         }
     }
 }

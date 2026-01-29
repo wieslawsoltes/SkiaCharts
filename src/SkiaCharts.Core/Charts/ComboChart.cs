@@ -23,6 +23,9 @@ public class ComboChart : ChartBase
         // Initialize default axes
         Configuration.PrimaryYAxis = new LinearAxis { Position = AxisPosition.Left };
         Configuration.SecondaryYAxis = new LinearAxis { Position = AxisPosition.Right };
+
+        // Use primary axis as the chart's main Y axis
+        YAxis = Configuration.PrimaryYAxis;
     }
 
     /// <summary>
@@ -79,6 +82,12 @@ public class ComboChart : ChartBase
 
         // Setup viewports for dual Y-axis if needed
         SetupViewports();
+
+        // Render secondary axis if enabled
+        if (Configuration.ShowSecondaryYAxis && Configuration.SecondaryYAxis != null && _secondaryViewport != null)
+        {
+            queue.Add(new AxisRenderElement(ChartArea, _secondaryViewport, Configuration.SecondaryYAxis, Theme, ChartBounds));
+        }
 
         // Group series by Y-axis and chart type
         var leftSeries = new List<(IDataSeries<IDataPoint> series, ComboSeriesConfiguration config)>();
@@ -142,22 +151,36 @@ public class ComboChart : ChartBase
         }
 
         // Setup primary viewport (left Y-axis)
-        if (leftYMin != double.MaxValue && leftYMax != double.MinValue)
+        if (leftYMin != double.MaxValue && leftYMax != double.MinValue && Configuration.PrimaryYAxis != null)
         {
-            Viewport.YDataRange = new DataRange(leftYMin, leftYMax);
+            var leftRange = new DataRange(leftYMin, leftYMax);
+            if (Configuration.PrimaryYAxis.AutoScale)
+            {
+                leftRange = Configuration.PrimaryYAxis.CalculateOptimalRange(leftRange);
+                Configuration.PrimaryYAxis.VisibleRange = leftRange;
+            }
+            Viewport.YDataRange = leftRange;
         }
 
         // Setup secondary viewport (right Y-axis) if needed
-        if (Configuration.ShowSecondaryYAxis && hasRightSeries && _secondaryViewport != null)
+        if (Configuration.ShowSecondaryYAxis && hasRightSeries && _secondaryViewport != null && Configuration.SecondaryYAxis != null)
         {
             if (rightYMin != double.MaxValue && rightYMax != double.MinValue)
             {
-                _secondaryViewport.YDataRange = new DataRange(rightYMin, rightYMax);
+                var rightRange = new DataRange(rightYMin, rightYMax);
+                if (Configuration.SecondaryYAxis.AutoScale)
+                {
+                    rightRange = Configuration.SecondaryYAxis.CalculateOptimalRange(rightRange);
+                    Configuration.SecondaryYAxis.VisibleRange = rightRange;
+                }
+                _secondaryViewport.YDataRange = rightRange;
             }
 
             // Synchronize screen rect with primary viewport
             _secondaryViewport.ScreenRect = Viewport.ScreenRect;
             _secondaryViewport.XDataRange = Viewport.XDataRange;
+
+            ApplyAxisTransforms(_secondaryViewport, XAxis, Configuration.SecondaryYAxis);
         }
     }
 

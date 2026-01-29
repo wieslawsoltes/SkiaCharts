@@ -93,8 +93,9 @@ public class ChartPanel
         // Save canvas state
         canvas.Save();
 
-        // Clip to panel bounds
-        canvas.ClipRect(Bounds);
+        // Translate to panel origin and clip to local bounds
+        canvas.Translate(Bounds.Left, Bounds.Top);
+        canvas.ClipRect(new SKRect(0, 0, Bounds.Width, Bounds.Height));
 
         // Render chart
         Chart.Render(canvas, Bounds.Width, Bounds.Height);

@@ -20,7 +20,8 @@ public class ParabolicSarIndicator : OverlayIndicatorBase
     }
 
     /// <inheritdoc/>
-    public override string Name => $"SAR({AccelerationFactor},{MaxAcceleration})";
+    public override string Name => string.Format(System.Globalization.CultureInfo.InvariantCulture,
+        "SAR({0},{1})", AccelerationFactor, MaxAcceleration);
 
     /// <summary>
     /// Gets or sets the initial acceleration factor.

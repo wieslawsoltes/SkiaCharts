@@ -86,6 +86,53 @@ public class PieChart : ChartBase
         }
     }
 
+    /// <inheritdoc/>
+    protected override IEnumerable<SkiaCharts.Core.Legend.LegendItem> BuildLegendItems(Theming.ChartTheme theme)
+    {
+        var items = new List<Legend.LegendItem>();
+        var palette = theme.ColorPalette;
+        var colorIndex = 0;
+
+        foreach (var series in Series)
+        {
+            var sliceIndex = 0;
+            foreach (var point in series)
+            {
+                if (point.Y <= 0)
+                {
+                    sliceIndex++;
+                    continue;
+                }
+
+                var style = GetSliceStyle(series, sliceIndex);
+                var label = point is PieDataPoint piePoint && !string.IsNullOrWhiteSpace(piePoint.Label)
+                    ? piePoint.Label!
+                    : !string.IsNullOrWhiteSpace(style.Label)
+                        ? style.Label!
+                        : $"Slice {sliceIndex + 1}";
+
+                var color = style.FillColor;
+                if (color == SKColors.Empty)
+                {
+                    color = palette.GetColor(colorIndex);
+                }
+
+                items.Add(new SkiaCharts.Core.Legend.LegendItem
+                {
+                    Text = label,
+                    Color = color,
+                    SymbolType = SkiaCharts.Core.Legend.LegendSymbolType.Rectangle,
+                    Data = point
+                });
+
+                sliceIndex++;
+                colorIndex++;
+            }
+        }
+
+        return items;
+    }
+
     private class PieRenderer : ChartElement
     {
         private readonly IDataSeries<IDataPoint> _series;

@@ -1,3 +1,5 @@
+using SkiaCharts.Core.Theming;
+
 namespace SkiaCharts.Core.Charts;
 
 /// <summary>
@@ -122,6 +124,16 @@ public class AreaSeriesStyle
     /// Areas are filled from this value to the data points.
     /// </summary>
     public double Baseline { get; set; } = 0.0;
+
+    /// <summary>
+    /// Gets or sets the pattern fill type (null for no pattern override).
+    /// </summary>
+    public PatternType? FillPattern { get; set; }
+
+    /// <summary>
+    /// Gets or sets the pattern scale factor (default 1.0).
+    /// </summary>
+    public float PatternScale { get; set; } = 1.0f;
 }
 
 /// <summary>

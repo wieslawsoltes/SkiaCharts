@@ -38,8 +38,8 @@ Enterprise-grade, modular charting framework with Excel/trading chart parity, re
 - [x] 1.2.2 Create `RenderQueue` - Layer-based rendering (background → grid → data → overlays)
 - [x] 1.2.3 Create `ViewportManager` - Coordinate transformation (data space ↔ screen space)
 - [x] 1.2.4 Create `ClipRegion` - Efficient clipping for viewport culling
-- [ ] 1.2.5 Create `RenderCache` - Cache SKBitmap layers for unchanged elements
-- [ ] 1.2.6 Create `DirtyRegionTracker` - Invalidate only changed regions
+- [x] 1.2.5 Create `RenderCache` - Cache SKBitmap layers for unchanged elements
+- [x] 1.2.6 Create `DirtyRegionTracker` - Invalidate only changed regions
 - [x] 1.2.7 Implement coordinate transformation matrix system
 - [x] 1.2.8 Write rendering pipeline tests
 - [ ] 1.2.9 Optimize SKPaint and SKPath object pooling
@@ -480,7 +480,7 @@ Enterprise-grade, modular charting framework with Excel/trading chart parity, re
 
 ### 7.3 Accessibility
 - [ ] 7.3.1 Implement colorblind-safe palettes
-- [ ] 7.3.2 Add pattern fills (for B&W printing)
+- [x] 7.3.2 Add pattern fills (for B&W printing)
 - [ ] 7.3.3 Ensure sufficient contrast ratios
 - [ ] 7.3.4 Add keyboard accessibility
 - [ ] 7.3.5 Document accessibility features

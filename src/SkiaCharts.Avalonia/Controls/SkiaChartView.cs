@@ -300,8 +300,12 @@ internal class SkiaChartDrawOperation : ICustomDrawOperation
         // Save canvas state
         canvas.Save();
 
+        var previousTheme = _chart.Theme;
+
         try
         {
+            _chart.Theme = _theme ?? ThemePresets.Light;
+
             // Apply DPI scaling if needed
             if (_dpiScale != 1.0f)
             {
@@ -318,13 +322,12 @@ internal class SkiaChartDrawOperation : ICustomDrawOperation
                 height /= _dpiScale;
             }
 
-            var renderBounds = new SKRect(0, 0, width, height);
-
             // Render the chart using the core rendering engine
             _chart.Render(canvas, width, height);
         }
         finally
         {
+            _chart.Theme = previousTheme;
             canvas.Restore();
         }
     }

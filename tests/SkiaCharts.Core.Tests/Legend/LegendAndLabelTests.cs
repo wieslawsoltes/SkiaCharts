@@ -385,7 +385,7 @@ public class LegendAndLabelTests
         // Arrange
         var manager = new DataLabelManager
         {
-            Formatter = value => $"${value:F2}"
+            Formatter = value => string.Format(System.Globalization.CultureInfo.InvariantCulture, "${0:F2}", value)
         };
 
         manager.AddLabel(new DataLabel

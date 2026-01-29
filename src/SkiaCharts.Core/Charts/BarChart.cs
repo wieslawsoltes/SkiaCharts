@@ -63,6 +63,40 @@ public class BarChart : ChartBase
         }
     }
 
+    /// <inheritdoc/>
+    protected override IEnumerable<SkiaCharts.Core.Legend.LegendItem> BuildLegendItems(SkiaCharts.Core.Theming.ChartTheme theme)
+    {
+        for (int index = 0; index < Series.Count; index++)
+        {
+            var series = Series[index];
+            var style = GetSeriesStyle(series);
+
+            var name = string.IsNullOrWhiteSpace(series.Name)
+                ? $"Series {index + 1}"
+                : series.Name!;
+
+            var patternType = style.FillPattern;
+            var patternScale = style.PatternScale;
+
+            if (!patternType.HasValue && (Accessibility.UsePatternFills || IsPatternFillTheme))
+            {
+                patternType = SkiaCharts.Core.Theming.PatternFills.GetCategoricalPattern(index);
+                patternScale = Accessibility.PatternScale;
+            }
+
+            yield return new SkiaCharts.Core.Legend.LegendItem
+            {
+                Text = name,
+                Color = style.FillColor,
+                SymbolType = SkiaCharts.Core.Legend.LegendSymbolType.Rectangle,
+                Data = series,
+                PatternType = patternType,
+                PatternScale = patternScale,
+                PatternBackgroundColor = BackgroundColor
+            };
+        }
+    }
+
     private class BarRenderer : ChartElement
     {
         private readonly DataSeriesCollection _allSeries;
@@ -136,7 +170,7 @@ public class BarChart : ChartBase
                     var barX = groupStart + seriesIndex * barWidth;
 
                     var barRect = CalculateBarRect(barX, 0, point.Y, barWidth, style);
-                    RenderBar(context, barRect, style, point.Y);
+                    RenderBar(context, barRect, style, point.Y, seriesIndex);
                 }
             }
         }
@@ -202,7 +236,7 @@ public class BarChart : ChartBase
                     }
 
                     var barRect = CalculateBarRect(x - barWidth / 2, cumulativeY, cumulativeY + value, barWidth, style);
-                    RenderBar(context, barRect, style, value);
+                    RenderBar(context, barRect, style, value, seriesIndex);
 
                     cumulativeY += value;
                 }
@@ -262,7 +296,7 @@ public class BarChart : ChartBase
             }
         }
 
-        private void RenderBar(IRenderContext context, SKRect rect, BarSeriesStyle style, double value)
+        private void RenderBar(IRenderContext context, SKRect rect, BarSeriesStyle style, double value, int seriesIndex)
         {
             // Fill
             using var fillPaint = new SKPaint
@@ -271,8 +305,13 @@ public class BarChart : ChartBase
                 IsAntialias = true
             };
 
-            // Apply gradient or solid fill
-            if (style.GradientColors != null && style.GradientColors.Length >= 2)
+            // Apply pattern, gradient, or solid fill
+            var patternScale = style.FillPattern.HasValue ? style.PatternScale : null;
+            if (_chart.TryApplyPatternFill(fillPaint, seriesIndex, style.FillColor, style.FillPattern, patternScale))
+            {
+                // Pattern fill applied via shader.
+            }
+            else if (style.GradientColors != null && style.GradientColors.Length >= 2)
             {
                 var angle = style.GradientAngle * (float)Math.PI / 180f;
                 var dx = (float)Math.Cos(angle);

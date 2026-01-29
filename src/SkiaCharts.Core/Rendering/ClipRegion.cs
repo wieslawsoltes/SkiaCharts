@@ -158,6 +158,8 @@ public readonly struct ClipRegion
     /// <inheritdoc/>
     public override string ToString()
     {
-        return $"ClipRegion(X={X:F1}, Y={Y:F1}, W={Width:F1}, H={Height:F1})";
+        return string.Format(System.Globalization.CultureInfo.InvariantCulture,
+            "ClipRegion(X={0:F1}, Y={1:F1}, W={2:F1}, H={3:F1})",
+            X, Y, Width, Height);
     }
 }

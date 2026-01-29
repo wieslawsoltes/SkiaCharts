@@ -124,7 +124,7 @@ public class LogarithmicAxis : IAxis
 
         if (!string.IsNullOrEmpty(LabelFormat))
         {
-            return value.ToString(LabelFormat);
+            return value.ToString(LabelFormat, System.Globalization.CultureInfo.InvariantCulture);
         }
 
         // Check if value is a power of the base
@@ -136,40 +136,40 @@ public class LogarithmicAxis : IAxis
             // It's a power of the base, format as such
             if (Base == 10)
             {
-                return $"10^{power:F0}";
+                return string.Format(System.Globalization.CultureInfo.InvariantCulture, "10^{0:F0}", power);
             }
             else if (Base == Math.E)
             {
-                return $"e^{power:F0}";
+                return string.Format(System.Globalization.CultureInfo.InvariantCulture, "e^{0:F0}", power);
             }
             else
             {
-                return $"{Base}^{power:F0}";
+                return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}^{1:F0}", Base, power);
             }
         }
 
         // Not a clean power, use scientific notation for large/small values
         if (value >= 10000 || value < 0.01)
         {
-            return value.ToString("E1");
+            return value.ToString("E1", System.Globalization.CultureInfo.InvariantCulture);
         }
 
         // Use decimal notation
         if (value < 1)
         {
-            return value.ToString("F3");
+            return value.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
         }
         else if (value < 10)
         {
-            return value.ToString("F2");
+            return value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
         }
         else if (value < 100)
         {
-            return value.ToString("F1");
+            return value.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
         }
         else
         {
-            return value.ToString("F0");
+            return value.ToString("F0", System.Globalization.CultureInfo.InvariantCulture);
         }
     }
 
